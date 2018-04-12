@@ -1,0 +1,61 @@
+body {
+    font-family: 'Raleway', sans-serif;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    margin: 0px;
+    
+}
+
+header {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    background-color: rgb(214, 221, 220);
+}
+
+header p {
+    font-size: 60px;
+    color: rgb(189, 198, 196);
+}
+
+.wrapper {
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.main p {
+    font-size: 25px;
+    color: rgb(189, 198, 196); 
+}
+
+.button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: white;
+    color: black;
+    border: 2px solid #e7e7e7;
+    width: 10%;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.button a {
+    font-size: 20px;
+    text-decoration: none;
+    color: rgb(189, 198, 196);
+}
+
+footer {
+    color: rgb(189, 198, 196);
+    font-size: 30px;
+    text-align: center;
+    margin-top: 50px; 
+}

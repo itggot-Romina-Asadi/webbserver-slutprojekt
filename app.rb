@@ -16,6 +16,11 @@ class App < Sinatra::Base
 		slim(:mypage)
 	end
 
+	get '/logout' do
+		session.clear
+		redirect('/')
+	end
+
 	get '/group' do
 		slim(:members)
 	end
