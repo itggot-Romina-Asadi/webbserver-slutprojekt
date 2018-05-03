@@ -4,12 +4,16 @@ html lang="en"
         meta charset="UTF-8"/
         meta name="viewport" content="width=device-width, initial-scale=1.0"/
         meta http-equiv="X-UA-Compatible" content="ie=edge"/
-        link rel="stylesheet" type="text/css" href="css/main.css"
         title Document
     body
         .main
+            p All of your groups:
 
-            p #{msg}
-
+            - groupname.each do |group|
+                .button
+                    a href="/grouppage/#{group[0]}" #{group[1]}
+                br
+            br
+            br
             .button
-                a href="javascript:history.back()" Go back
+                a href="/mypage" My page

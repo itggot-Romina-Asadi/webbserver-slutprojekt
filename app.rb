@@ -1,4 +1,5 @@
 class App < Sinatra::Base
+	enable :sessions
 
 	get '/' do
 		slim(:index)
@@ -22,11 +23,38 @@ class App < Sinatra::Base
 	end
 
 	get '/group' do
-		slim(:members)
+		slim(:groups)
 	end
+
+	get '/grouplist' do
+		((user_id = session[:user_id]).to_s).to_i
+		p user_id
+		db = SQLite3::Database.new("db/slutprojekt.db")
+		groupname = db.execute("SELECT * FROM groups WHERE user_id=?", [user_id])
+		slim(:grouplist, locals:{groupname:groupname} )
+	end 
 
 	get '/todo' do
 		slim(:todo)
+	end
+
+	get '/grouppage/:id' do
+		((user_id = session[:user_id]).to_s).to_i
+		group_id = params[:id].to_i
+		db = SQLite3::Database.new("db/slutprojekt.db")
+		groupname = db.execute("SELECT name FROM groups WHERE user_id=?", [user_id])
+		members = db.execute("SELECT username FROM users WHERE user_id IN (SELECT user_id FROM groups WHERE group_id = ?)", [group_id])
+		slim(:grouppage, locals:{group:groupname, users:members, group_id:group_id} )
+	end
+
+	get '/members/:id' do
+		group_id = params[:id].to_i
+		db = SQLite3::Database.new("db/slutprojekt.db")
+		groupname = db.execute("SELECT name FROM groups WHERE user_id=?", [user_id])
+		members = db.execute("SELECT username FROM users WHERE user_id IN (SELECT user_id FROM groups WHERE group_id = ?)", [group_id])
+		p members
+		p groupname
+		slim(:grouppage, locals:{group:groupname, users:members, group_id:group_id} )
 	end
 
 	get '/error' do
@@ -72,6 +100,14 @@ class App < Sinatra::Base
 			sesson[:message] = "The username is unavailable"
 			redirect('/error')
 		end
+	end
+
+	post '/group' do
+		((user_id = session[:user_id]).to_s).to_i
+		db = SQLite3::Database.new("db/slutprojekt.db")
+		groupname = params["name"]
+		db.execute("INSERT INTO groups (user_id, name) VALUES (?, ?)", [user_id, groupname])
+		redirect('/grouplist')
 	end
 
 end
