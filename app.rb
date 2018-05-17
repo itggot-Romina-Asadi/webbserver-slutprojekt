@@ -1,4 +1,7 @@
 class App < Sinatra::Base
+
+	require_relative 'module.rb'
+	include Database
 	enable :sessions
 
 	get '/' do
@@ -27,8 +30,7 @@ class App < Sinatra::Base
 	end
 
 	get '/grouplist' do
-		((user_id = session[:user_id]).to_s).to_i
-		p user_id
+		user_id = session[:user_id]
 		db = SQLite3::Database.new("db/slutprojekt.db")
 		groupname = db.execute("SELECT * FROM groups WHERE user_id=?", [user_id])
 		slim(:grouplist, locals:{groupname:groupname} )
@@ -39,15 +41,22 @@ class App < Sinatra::Base
 	end
 
 	get '/grouppage/:id' do
-		((user_id = session[:user_id]).to_s).to_i
+		user_id = session[:user_id]
 		group_id = params[:id].to_i
 		db = SQLite3::Database.new("db/slutprojekt.db")
 		groupname = db.execute("SELECT name FROM groups WHERE user_id=?", [user_id])
 		members = db.execute("SELECT username FROM users WHERE user_id IN (SELECT user_id FROM groups WHERE group_id = ?)", [group_id])
-		slim(:grouppage, locals:{group:groupname, users:members, group_id:group_id} )
+		username = db.execute("SELECT username FROM users WHERE user_id = ?", [user_id]).join
+		if members.include?([username])
+			slim(:grouppage, locals:{group:groupname, users:members, group_id:group_id})
+		else
+			session[:message] = "You're not a member of this group"
+			redirect('/error')
+		end
 	end
+
 	get '/error' do
-		slim(:error, locals:{msg:session[:message]})
+		slim(:error, locals:{msg:session[:message], direction:session[:direction]})
 	end
 
 	post '/signin' do
@@ -72,27 +81,31 @@ class App < Sinatra::Base
 		password = params["password"]
 		password2 = params["password2"]
 		password_digest = BCrypt::Password.create("#{password}")
-		if username.length > 0 
+		usernames = db.execute("SELECT username FROM users")
+		p usernames
+		p [username]
+		p usernames.include?([username])
+		if username.length > 3
 			if password == password2 && password.length > 0
-				begin
-					db.execute("INSERT INTO users (username, password) VALUES (?,?)", [username, password_digest])
-				rescue 
+				if usernames.include?([username])
 					session[:message] = "The username is unavailable"
 					redirect('/error')
+				else
+					db.execute("INSERT INTO users (username, password) VALUES (?,?)", [username, password_digest])
+					redirect('/signin')
 				end
-				redirect('/signin')
 			else
 				session[:message] = "Password unavailable"
 				redirect('/error')
 			end
 		else
-			session[:message] = "The username is unavailable"
+			session[:message] = "The username is too short"
 			redirect('/error')
 		end
 	end
 
 	post '/group' do
-		((user_id = session[:user_id]).to_s).to_i
+		user_id = session[:user_id]
 		db = SQLite3::Database.new("db/slutprojekt.db")
 		groupname = params["name"]
 		db.execute("INSERT INTO groups (user_id, name) VALUES (?, ?)", [user_id, groupname])
