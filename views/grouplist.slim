@@ -9,7 +9,8 @@ html lang="en"
         .main
             p All of your groups:
 
-            - groupname.each do |group|
+            - groups.each do |group_id_in_list|
+                -group = group_id_name[group_id_in_list[0]]
                 .button
                     a href="/grouppage/#{group[0]}" #{group[1]}
                 br

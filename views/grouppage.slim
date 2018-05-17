@@ -7,7 +7,7 @@ html lang="en"
         title Document
     body
 
-    .main
+        .main
             p Members:
 
             -users.each do |user|
@@ -18,3 +18,11 @@ html lang="en"
             br
             .button
                 a href="/mypage" My page
+            .invite
+                h2 Invite other users
+                input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names.."
+                ul id="myUL"
+                    - allusernames.each do |username|
+                        li
+                            a href="/invite/#{username[0]}/#{group_id}" = username[0]
+script src="/js/js.js"

@@ -62,3 +62,12 @@ footer {
     color: rgb(189, 198, 196);
     text-align: center;
 }
+
+h2 {
+    color: rgb(189, 198, 196);
+    font-size: 30px;
+}
+
+.invite {
+    text-decoration: none;
+}

@@ -31,9 +31,14 @@ class App < Sinatra::Base
 
 	get '/grouplist' do
 		user_id = session[:user_id]
-		groupname = get_groupname(user_id)
-		slim(:grouplist, locals:{groupname:groupname} )
-	end 
+		group_info = get_group_info(user_id)
+		groups = get_group_ids(user_id)
+		group_id_name = {}
+		group_info.each do |group|
+			group_id_name[group[0]] = group
+		end
+		slim(:grouplist, locals:{group_info:group_info, groups:groups, group_id_name:group_id_name})
+	end
 
 	get '/todo' do
 		slim(:todo)
@@ -42,11 +47,12 @@ class App < Sinatra::Base
 	get '/grouppage/:id' do
 		user_id = session[:user_id]
 		group_id = params[:id].to_i
-		groupname = get_groupname(user_id)
 		members = get_members(group_id)
 		username = get_username(user_id)
+		allusernames = get_all_usernames()
+		allusernames = allusernames.reject {|w| members.include? w}
 		if members.include?([username])
-			slim(:grouppage, locals:{group:groupname, users:members, group_id:group_id})
+			slim(:grouppage, locals:{users:members, group_id:group_id, allusernames:allusernames})
 		else
 			session[:message] = "You're not a member of this group"
 			redirect('/error')
@@ -102,6 +108,22 @@ class App < Sinatra::Base
 		groupname = params["name"]
 		create_group(user_id, groupname)
 		redirect('/grouplist')
+	end
+
+	get '/invite/:username/:group_id' do
+		reciever_username = params["username"]
+		group_id = params["group_id"]
+		members = get_members(group_id)
+		user_id = session[:user_id]
+		username = get_username(user_id)
+		if members.include?([username])
+			reciever_id = get_user_id(reciever_username)
+			add_user(reciever_id, group_id)
+			redirect("/grouppage/#{group_id}")
+		else
+			session[:message] = "You're not a member of this group"
+			redirect('/error')
+		end
 	end
 
 end
